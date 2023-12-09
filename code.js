@@ -9,10 +9,16 @@ bottomPipe = new Image();
 
 let birdXPosition = 10;
 let birdYPosition = 150;
-let gravitationFroce = 1;
+let gravitationFroce = 1.5;
 
 let pipesPosition = [];
 let currentPipeIndex;
+let holeBetweenPipesHeight = 75;
+
+let infoText = document.getElementById("info-text");
+let scoreText = document.getElementById("score-text");
+
+let score = 0;
 
 function loadImages() {
     bird.src = "img/bird.png";
@@ -24,12 +30,10 @@ function loadImages() {
 }
 
 function fillCanvas() {
-
     context.drawImage(background, 0, 0);
     spawnPipes();
     context.drawImage(ground, 0, canvas.height - ground.height);
     context.drawImage(bird, birdXPosition, birdYPosition);
-
 }
 
 function spawnPipes() {
@@ -39,21 +43,21 @@ function spawnPipes() {
         currentPipeIndex = i;
 
         context.drawImage(topPipe, pipesPosition[i].x, pipesPosition[i].y);
-        context.drawImage(bottomPipe, pipesPosition[i].x, pipesPosition[i].y + topPipe.height + 90);
+        context.drawImage(bottomPipe, pipesPosition[i].x, pipesPosition[i].y + topPipe.height + holeBetweenPipesHeight);
 
         movePipe(pipesPosition[i]);
         checkCollision(pipesPosition[i]);
 
-        if (pipesPosition[i].x == 50) {
+        if (pipesPosition[i].x == 40) {
+
+            updateScore();
 
             pipesPosition.push({
                 x : canvas.width, 
                 y : Math.floor(Math.random() * topPipe.height) - topPipe.height
             });
-
         }
     }
-
 }
 
 function movePipe (currentPipe) {
@@ -61,11 +65,10 @@ function movePipe (currentPipe) {
 }
 
 function checkCollision(currentPipe) {
-
     if (birdXPosition + bird.width >= currentPipe.x &&
         birdXPosition <= currentPipe.x + topPipe.width &&
        (birdYPosition <= currentPipe.y + topPipe.height || 
-        birdYPosition + bird.height >= currentPipe.y + topPipe.height + 90)) {
+        birdYPosition + bird.height >= currentPipe.y + topPipe.height + holeBetweenPipesHeight)) {
             setGameOver();
          }
 
@@ -79,22 +82,31 @@ function enableGravity(){
 }
 
 function doBirdJump() {
-    birdYPosition -= 20;
+    birdYPosition -= 25;
 }
 
 function setGameOver() {
-    location.reload();
+    bird.src = null;
+    setText('Game Over! Press R to restart...', infoText);
+}
+
+function setText(text, textObject) {
+    textObject.textContent = String(text);
+}
+
+function updateScore() {
+    score++;
+    setText(`score: ${score}`, scoreText);
 }
 
 function start() {
-
     loadImages();
     pipesPosition[0] = {x : canvas.width, y : 0 }
-
+    setText('Jump with space!', infoText);
+    setText('score: 0', scoreText);
 }
 
 function update() {
-
     fillCanvas();
     enableGravity();
 
@@ -108,4 +120,12 @@ start();
 update();
 
 // Calls when some key is pressed
-document.addEventListener("keydown", doBirdJump);
+document.addEventListener("keydown", function(event) {
+    if (event.key === " ") {
+        doBirdJump();
+    }
+
+    if (event.key === "r" || event.key === "к") {
+        location.reload();
+    }
+});
